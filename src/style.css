@@ -36,6 +36,15 @@ h1 {
 }
 
 #app {
+  display: flex;
+}
+
+aside {
+  width: 240px;
+  padding: 24px;
+}
+
+main {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;

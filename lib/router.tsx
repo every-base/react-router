@@ -1,4 +1,9 @@
-import { createContext, lazy, Suspense, useContext } from "react"
+import { createContext, lazy, Suspense, useContext, useEffect, useMemo, useState } from "react"
+import { createNavigation, type Navigation }from './navigation'
+import { type Location } from "./history"
+
+const NavigationContext = createContext<Navigation | undefined>(undefined)
+const useNavigation = () => useContext(NavigationContext)!
 
 const LocationContext = createContext<Location | undefined>(undefined)
 const useLocation = () => useContext(LocationContext)!
@@ -8,6 +13,8 @@ const useParams = () => useContext(ParamsContext)!
 
 const OutletContext = createContext<React.ReactNode>(undefined)
 const useOutlet = () => useContext(OutletContext)
+
+type LazyLoad = () => Promise<{ default: React.ComponentType }>
 
 export type Route = {
   children?: Route[]
@@ -31,23 +38,36 @@ export type Route = {
   } | {
     Component?: never
     element?: never
-    lazy?: () => Promise<{ default: React.ComponentType }>
+    lazy?: LazyLoad
   }
 )
 
+interface RouterProps {
+  history?: History
+}
+
 export function createRouter(routes: Route[]) {
-  function Router() {
+  function Router({ history = window.history }: RouterProps) {
+    const [location, setLocation] = useState<Location>(window.location)
+    const navigation = useMemo(() => createNavigation(history), [history])
+    
+    useEffect(() => navigation.register(({ location }) => setLocation(location)), [navigation])
+
     return (
-      <LocationContext value={location}>
-        <Routes routes={routes} />
-      </LocationContext>
+      <NavigationContext value={navigation}>
+        <LocationContext value={location}>
+          <Routes routes={routes} />
+        </LocationContext>
+      </NavigationContext>
     )
   }
 
+  Router.useNavigation = useNavigation
   Router.useOutlet = useOutlet
   Router.useParams = useParams
 
   Router.Outlet = Outlet
+  Router.Link = Link
 
   return Router
 }
@@ -71,6 +91,8 @@ function Routes({ routes }: RoutesProps) {
 
 type RouteProps = React.PropsWithChildren<Omit<Route, 'children'>>
 
+const LazyComponentMap = new Map<LazyLoad, React.LazyExoticComponent<React.ComponentType>>()
+
 function Route({
   children: outlet,
   lazy: load,
@@ -79,7 +101,11 @@ function Route({
 }: RouteProps) {
   let children = element
   if (load) {
-    const Lazy = lazy(load)
+    if (!LazyComponentMap.has(load)) {
+      LazyComponentMap.set(load, lazy(load))
+    }
+    
+    const Lazy = LazyComponentMap.get(load)!
     children = (
       <Suspense>
         <Lazy />
@@ -96,6 +122,37 @@ function Route({
 
 function Outlet() {
   return useOutlet()
+}
+
+type LinkProps = Omit<React.ComponentPropsWithRef<'a'>, 'href'> & (
+  {
+    to: string
+    replace?: boolean
+  } | {
+    to: number
+    replace?: never
+  }
+)
+
+function Link({ to, replace, ...props }: LinkProps) {
+  const navigation = useNavigation()
+
+  return (
+    <a 
+      {...props} 
+      href={typeof to === 'number' ? '' : to}
+      onClick={e => {
+        e.preventDefault()
+        if (typeof to === 'number') {
+          navigation.go(to)
+        } else if (replace) {
+          navigation.replace(to)
+        } else {
+          navigation.push(to)
+        }
+      }} 
+    />
+  )
 }
 
 function renderRoutes(routes: Route[], path: number[]) {

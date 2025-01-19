@@ -1,0 +1,1 @@
+export type Location = Pick<globalThis.Location, 'pathname' | 'hash' | 'search'>
