@@ -1,24 +1,24 @@
-import Router from "../Router";
+import { Link, Outlet } from "../../lib/main";
 
 export default function Layout() {
   return (
     <>
       <aside>
-        <Router.Link to='/'>@everybase/router</Router.Link>
+        <Link to='/'>@everybase/router</Link>
         <ul>
           <li>
-            <Router.Link to='/dashboard'>Dasboard</Router.Link>
+            <Link to='/dashboard'>Dasboard</Link>
           </li>
           <li>
-            <Router.Link to='/users/1'>User 1</Router.Link>
+            <Link to='/users/1'>User 1</Link>
           </li>
           <li>
-            <Router.Link to='/not-found'>Not found</Router.Link>
+            <Link to='/not-found'>Not found</Link>
           </li>
         </ul>
       </aside>
       <main>
-        <Router.Outlet />
+        <Outlet />
       </main>
     </>
   )

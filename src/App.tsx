@@ -1,9 +1,9 @@
-import { createRouter }from '../lib/main'
 import Home from './routes/Home'
 import Layout from './routes/Layout'
 import MainLayout from './routes/MainLayout'
+import { type Route, Router, Routes } from '../lib/main'
 
-const Router = createRouter([
+const routes: Route[] = [
   {
     Component: Layout,
     children: [
@@ -35,6 +35,12 @@ const Router = createRouter([
     path: '*',
     Component: () => <p>Page not found</p>
   }
-])
+]
 
-export default Router
+export default function App() {
+  return (
+    <Router>
+      <Routes routes={routes} />
+    </Router>
+  )
+}

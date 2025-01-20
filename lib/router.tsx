@@ -3,13 +3,13 @@ import { createNavigation, type Navigation }from './navigation'
 import { type Location } from "./history"
 
 const NavigationContext = createContext<Navigation | undefined>(undefined)
-const useNavigation = () => useContext(NavigationContext)!
+export const useNavigation = () => useContext(NavigationContext)!
 
 const LocationContext = createContext<Location | undefined>(undefined)
-const useLocation = () => useContext(LocationContext)!
+export const useLocation = () => useContext(LocationContext)!
 
 const ParamsContext = createContext<Record<string, string> | undefined>(undefined)
-const useParams = () => useContext(ParamsContext)!
+export const useParams = () => useContext(ParamsContext)!
 
 const OutletContext = createContext<React.ReactNode>(undefined)
 const useOutlet = () => useContext(OutletContext)
@@ -42,41 +42,30 @@ export type Route = {
   }
 )
 
-interface RouterProps {
+type RouterProps = React.PropsWithChildren<{
   history?: History
-}
+}>
 
-export function createRouter(routes: Route[]) {
-  function Router({ history = window.history }: RouterProps) {
-    const [location, setLocation] = useState<Location>(window.location)
-    const navigation = useMemo(() => createNavigation(history), [history])
-    
-    useEffect(() => navigation.register(({ location }) => setLocation(location)), [navigation])
+export function Router({ children, history = window.history }: RouterProps) {
+  const [location, setLocation] = useState<Location>(window.location)
+  const navigation = useMemo(() => createNavigation(history), [history])
+  
+  useEffect(() => navigation.register(({ location }) => setLocation(location)), [navigation])
 
-    return (
-      <NavigationContext value={navigation}>
-        <LocationContext value={location}>
-          <Routes routes={routes} />
-        </LocationContext>
-      </NavigationContext>
-    )
-  }
-
-  Router.useNavigation = useNavigation
-  Router.useOutlet = useOutlet
-  Router.useParams = useParams
-
-  Router.Outlet = Outlet
-  Router.Link = Link
-
-  return Router
+  return (
+    <NavigationContext value={navigation}>
+      <LocationContext value={location}>
+        {children}
+      </LocationContext>
+    </NavigationContext>
+  )
 }
 
 interface RoutesProps {
   routes: Route[]
 }
 
-function Routes({ routes }: RoutesProps) {
+export function Routes({ routes }: RoutesProps) {
   const { pathname } = useLocation()
   const routeMatch = matchRoute(routes, pathname)
   
@@ -120,7 +109,7 @@ function Route({
   )
 }
 
-function Outlet() {
+export function Outlet() {
   return useOutlet()
 }
 
@@ -134,7 +123,7 @@ type LinkProps = Omit<React.ComponentPropsWithRef<'a'>, 'href'> & (
   }
 )
 
-function Link({ to, replace, ...props }: LinkProps) {
+export function Link({ to, replace, ...props }: LinkProps) {
   const navigation = useNavigation()
 
   return (

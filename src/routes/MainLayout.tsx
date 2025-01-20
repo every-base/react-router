@@ -1,10 +1,10 @@
-import Router from "../Router";
+import { Link, Outlet } from '../../lib/main';
 
 export default function MainLayout() {
   return (
     <>
-      <Router.Link to={-1}>Back</Router.Link>
-      <Router.Outlet />
+      <Link to={-1}>Back</Link>
+      <Outlet />
     </>
   )
 }
