@@ -113,28 +113,39 @@ export function Outlet() {
   return useOutlet()
 }
 
-type LinkProps = Omit<React.ComponentPropsWithRef<'a'>, 'href'> & (
-  {
-    to: string
-    replace?: boolean
-  } | {
-    to: number
-    replace?: never
-  }
-)
+type AnchorLinkProps = Omit<React.ComponentPropsWithRef<'a'>, 'href'> & {
+  to: string
+  replace?: boolean
+}
+type ButtonLinkProps = React.ComponentPropsWithRef<'button'> & {
+  to: number
+}
 
-export function Link({ to, replace, ...props }: LinkProps) {
+export function Link(props: AnchorLinkProps): React.JSX.Element
+export function Link(props: ButtonLinkProps): React.JSX.Element
+export function Link(props: AnchorLinkProps | ButtonLinkProps) {
   const navigation = useNavigation()
+
+  if (isButtonLinkProps(props)) {
+    const { to, ...rest } = props
+    
+    return (
+      <button 
+        {...rest} 
+        onClick={() => navigation.go(to)}
+      />
+    )
+  }
+
+  const { to, replace, ...rest } = props
 
   return (
     <a 
-      {...props} 
-      href={typeof to === 'number' ? '' : to}
+      {...rest} 
+      href={to}
       onClick={e => {
         e.preventDefault()
-        if (typeof to === 'number') {
-          navigation.go(to)
-        } else if (replace) {
+        if (replace) {
           navigation.replace(to)
         } else {
           navigation.push(to)
@@ -142,6 +153,10 @@ export function Link({ to, replace, ...props }: LinkProps) {
       }} 
     />
   )
+}
+
+function isButtonLinkProps(props: AnchorLinkProps | ButtonLinkProps): props is ButtonLinkProps {
+  return typeof props.to === 'number'
 }
 
 function renderRoutes(routes: Route[], path: number[]) {
