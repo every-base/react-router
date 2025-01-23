@@ -1,19 +1,19 @@
 {
-  "name": "router",
-  "private": true,
+  "name": "@everybase/router",
   "version": "0.0.0",
   "type": "module",
+  "license": "MIT",
   "files": [
     "dist",
-    "index.d.ts"
+    "types/lib"
   ],
-  "main": "./dist/counter.umd.cjs",
-  "module": "./dist/counter.js",
-  "types": "./index.d.ts",
+  "main": "./dist/main.umd.cjs",
+  "module": "./dist/main.js",
+  "types": "./types/lib/main.d.ts",
   "exports": {
-    "types": "./index.d.ts",
-    "import": "./dist/counter.js",
-    "require": "./dist/counter.umd.cjs"
+    "types": "./types/lib/main.d.ts",
+    "import": "./dist/main.js",
+    "require": "./dist/main.umd.cjs"
   },
   "scripts": {
     "dev": "vite",
