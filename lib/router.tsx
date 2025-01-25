@@ -113,6 +113,30 @@ export function Outlet() {
   return useOutlet()
 }
 
+type NavigateProps = {
+  to: string
+  replace?: boolean
+} | {
+  to: number
+  replace?: never
+}
+
+export function Navigate({ to, replace }: NavigateProps) {
+  const navigation = useNavigation()
+
+  useEffect(() => {
+    if (typeof to === 'number') {
+      navigation.go(to)
+    } else if (replace) {
+      navigation.replace(to)
+    } else {
+      navigation.push(to)
+    }
+  }, [navigation, to, replace])
+
+  return null
+}
+
 type AnchorLinkProps = Omit<React.ComponentPropsWithRef<'a'>, 'href'> & {
   to: string
   replace?: boolean

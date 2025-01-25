@@ -1,2 +1,2 @@
-export { Router, Routes, Link, Outlet, useLocation, useNavigation, useParams } from './router'
+export { Router, Routes, Link, Outlet, Navigate, useLocation, useNavigation, useParams } from './router'
 export type { Route } from './router'
